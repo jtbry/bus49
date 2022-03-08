@@ -1,4 +1,4 @@
-# CharlotteRoadReports (cltrr)
+# bus49
 ### View the [release](https://bus49-63baa.web.app)
 <br>
 Bus49 is a Flutter application to help students navigate the UNC Charlotte campus transport system. Originally UNC Charlotte used the RideSystems (NextRide) app. Recently they switched to PassioGO. After hearing a lot of complaints from the student body I decided to see if it was possible to make a better app albeit still using Passio's data.
