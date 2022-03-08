@@ -15,7 +15,7 @@ class MapData {
     required this.buses,
   });
 
-  List<Marker> generateMarkers() {
+  List<Marker> generateMarkers(Function(dynamic) triggerMarkerInfo) {
     List<Marker> markers = [];
     for (BusRoute route in routes) {
       if (route.enabled) {
@@ -26,9 +26,7 @@ class MapData {
                 return GestureDetector(
                   child: Icon(Icons.circle, size: 16, color: route.color),
                   onTap: () {
-                    // TODO: on tap show the stop info widget
-                    ScaffoldMessenger.of(context)
-                        .showSnackBar(SnackBar(content: Text(stop.name)));
+                    triggerMarkerInfo(stop);
                   },
                   behavior: HitTestBehavior.translucent,
                 );

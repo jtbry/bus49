@@ -105,7 +105,9 @@ class _MapViewState extends State<MapView> {
             },
           ),
           PolylineLayerOptions(polylines: map.generatePolylines()),
-          MarkerLayerOptions(markers: map.generateMarkers()),
+          MarkerLayerOptions(
+              markers:
+                  map.generateMarkers((o) => _triggerMarkerInfo(o, context))),
         ],
       );
     } else {
@@ -194,5 +196,13 @@ class _MapViewState extends State<MapView> {
             title: Text('Bus ${buses[i].busId} - ${buses[i].route.name}'),
           );
         });
+  }
+
+  void _triggerMarkerInfo(dynamic markerDataObject, BuildContext context) {
+    if (markerDataObject is BusStop) {
+      showModalBottomSheet(
+          context: context,
+          builder: (ctx) => _stopInfoWidget(markerDataObject));
+    }
   }
 }
