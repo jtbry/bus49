@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:bus49/label_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:bus49/passiogo.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -48,33 +49,38 @@ class _MapViewState extends State<MapView> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  IconButton(
-                      onPressed: () {
-                        showModalBottomSheet(
-                            context: context,
-                            builder: (context) =>
-                                _routeSelectorWidget(snapshot.data));
-                      },
-                      icon: const Icon(Icons.route),
-                      color: Colors.white),
-                  IconButton(
-                      onPressed: () {
-                        showModalBottomSheet(
-                            context: context,
-                            builder: (context) =>
-                                _stopListWidget(snapshot.data));
-                      },
-                      icon: const Icon(Icons.stop_circle),
-                      color: Colors.white),
-                  IconButton(
-                      onPressed: () {
-                        showModalBottomSheet(
-                            context: context,
-                            builder: (context) =>
-                                _busListWidget(snapshot.data!.buses));
-                      },
-                      icon: const Icon(Icons.bus_alert),
-                      color: Colors.white),
+                  LabelIconButton(
+                    iconData: Icons.route,
+                    color: Colors.white,
+                    labelText: "Routes",
+                    onPressed: () {
+                      showModalBottomSheet(
+                          context: context,
+                          builder: (context) =>
+                              _routeSelectorWidget(snapshot.data));
+                    },
+                  ),
+                  LabelIconButton(
+                    iconData: Icons.stop_circle,
+                    color: Colors.white,
+                    labelText: "Stops",
+                    onPressed: () {
+                      showModalBottomSheet(
+                          context: context,
+                          builder: (context) => _stopListWidget(snapshot.data));
+                    },
+                  ),
+                  LabelIconButton(
+                    iconData: Icons.bus_alert,
+                    color: Colors.white,
+                    labelText: "Buses",
+                    onPressed: () {
+                      showModalBottomSheet(
+                          context: context,
+                          builder: (context) =>
+                              _busListWidget(snapshot.data!.buses));
+                    },
+                  ),
                 ],
               ),
             ),
