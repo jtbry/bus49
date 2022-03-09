@@ -1,4 +1,4 @@
-import 'package:bus49/map_view.dart';
+import 'package:bus49/screens/map_view.dart';
 import 'package:flutter/material.dart';
 
 void main() => runApp(const MyApp());
