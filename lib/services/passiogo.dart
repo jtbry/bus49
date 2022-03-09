@@ -1,132 +1,14 @@
-import 'dart:math';
+import 'dart:convert';
 
+import 'package:bus49/models/bus.dart';
+import 'package:bus49/models/bus_route.dart';
+import 'package:bus49/models/bus_stop.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
-import 'dart:convert';
-import 'package:flutter/material.dart';
 
-class MapData {
-  final LatLng center;
-  final List<BusRoute> routes;
-  List<Bus> buses;
-
-  MapData({
-    required this.center,
-    required this.routes,
-    required this.buses,
-  });
-
-  List<Marker> generateMarkers(Function(dynamic) triggerMarkerInfo) {
-    List<Marker> markers = [];
-    for (BusRoute route in routes) {
-      if (route.enabled) {
-        for (BusStop stop in route.stops) {
-          markers.add(Marker(
-              point: stop.pos,
-              builder: (context) {
-                return GestureDetector(
-                  child: Icon(Icons.circle, size: 16, color: route.color),
-                  onTap: () => triggerMarkerInfo(stop),
-                  behavior: HitTestBehavior.translucent,
-                );
-              }));
-        }
-      }
-    }
-
-    for (Bus bus in buses) {
-      if (bus.route.enabled) {
-        // TODO: better and more visible marker?
-        markers.add(Marker(
-            point: bus.pos,
-            builder: (context) {
-              return GestureDetector(
-                child: Transform.rotate(
-                  angle: (bus.course) * 2.0 * pi / 365.0,
-                  child: Container(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.white,
-                        border: Border.all(color: bus.route.color, width: 3),
-                      ),
-                      child: Icon(
-                        Icons.directions_bus,
-                        color: bus.route.color,
-                        size: 20,
-                      )),
-                ),
-                onTap: () => triggerMarkerInfo(bus),
-                behavior: HitTestBehavior.translucent,
-              );
-            }));
-      }
-    }
-    return markers;
-  }
-
-  List<Polyline> generatePolylines() {
-    List<Polyline> polylines = [];
-    for (BusRoute route in routes) {
-      if (route.enabled) {
-        for (Polyline line in route.routeLines) {
-          polylines.add(line);
-        }
-      }
-    }
-    return polylines;
-  }
-}
-
-class BusRoute {
-  final String id;
-  final String name;
-  final Color color;
-  final List<Polyline> routeLines;
-  final List<BusStop> stops;
-  bool enabled;
-
-  BusRoute({
-    required this.id,
-    required this.name,
-    required this.color,
-    required this.routeLines,
-    required this.stops,
-    required this.enabled,
-  });
-}
-
-class BusStop {
-  final String id;
-  final LatLng pos;
-  final String name;
-
-  const BusStop({
-    required this.id,
-    required this.pos,
-    required this.name,
-  });
-}
-
-class Bus {
-  final int deviceId;
-  final int busId;
-  final int paxLoad;
-  final int paxCap;
-  final BusRoute route;
-  final LatLng pos;
-  final double course;
-
-  const Bus({
-    required this.deviceId,
-    required this.busId,
-    required this.paxLoad,
-    required this.paxCap,
-    required this.route,
-    required this.pos,
-    required this.course,
-  });
-}
+import '../models/map_data.dart';
 
 Future<MapData> fetchMapData() async {
   var headers = {
