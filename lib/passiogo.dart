@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter_map/flutter_map.dart';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
@@ -25,9 +27,7 @@ class MapData {
               builder: (context) {
                 return GestureDetector(
                   child: Icon(Icons.circle, size: 16, color: route.color),
-                  onTap: () {
-                    triggerMarkerInfo(stop);
-                  },
+                  onTap: () => triggerMarkerInfo(stop),
                   behavior: HitTestBehavior.translucent,
                 );
               }));
@@ -41,10 +41,23 @@ class MapData {
         markers.add(Marker(
             point: bus.pos,
             builder: (context) {
-              return const Icon(
-                Icons.bus_alert,
-                color: Colors.red,
-                size: 20,
+              return GestureDetector(
+                child: Transform.rotate(
+                  angle: (bus.course) * 2.0 * pi / 365.0,
+                  child: Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white,
+                        border: Border.all(color: bus.route.color, width: 3),
+                      ),
+                      child: Icon(
+                        Icons.directions_bus,
+                        color: bus.route.color,
+                        size: 20,
+                      )),
+                ),
+                onTap: () => triggerMarkerInfo(bus),
+                behavior: HitTestBehavior.translucent,
               );
             }));
       }
@@ -102,6 +115,7 @@ class Bus {
   final int paxCap;
   final BusRoute route;
   final LatLng pos;
+  final double course;
 
   const Bus({
     required this.deviceId,
@@ -110,6 +124,7 @@ class Bus {
     required this.paxCap,
     required this.route,
     required this.pos,
+    required this.course,
   });
 }
 
@@ -222,6 +237,9 @@ Future<List<Bus>> fetchBusData(List<BusRoute> routes) async {
               .firstWhere((element) => element.id == childValue['routeId']),
           pos: LatLng(double.parse(childValue['latitude']),
               double.parse(childValue['longitude'])),
+          course: childValue['calculatedCourse'] != null
+              ? double.parse(childValue['calculatedCourse'])
+              : 0.0,
         ),
       );
     });

@@ -71,7 +71,7 @@ class _MapViewState extends State<MapView> {
                     },
                   ),
                   LabelIconButton(
-                    iconData: Icons.bus_alert,
+                    iconData: Icons.directions_bus,
                     color: Colors.white,
                     labelText: "Buses",
                     onPressed: () {
@@ -200,8 +200,21 @@ class _MapViewState extends State<MapView> {
         itemBuilder: (context, i) {
           return ListTile(
             title: Text('Bus ${buses[i].busId} - ${buses[i].route.name}'),
+            onTap: () {
+              Navigator.pop(context);
+              showModalBottomSheet(
+                  context: context,
+                  builder: (context) => _busInfoWidget(buses[i]));
+            },
           );
         });
+  }
+
+  Widget _busInfoWidget(Bus bus) {
+    return SizedBox(
+      height: 100,
+      child: Center(child: Text('Bus ${bus.busId} information')),
+    );
   }
 
   void _triggerMarkerInfo(dynamic markerDataObject, BuildContext context) {
@@ -209,6 +222,11 @@ class _MapViewState extends State<MapView> {
       showModalBottomSheet(
           context: context,
           builder: (ctx) => _stopInfoWidget(markerDataObject));
+    } else if (markerDataObject is Bus) {
+      showModalBottomSheet(
+        context: context,
+        builder: (ctx) => _busInfoWidget(markerDataObject),
+      );
     }
   }
 }
