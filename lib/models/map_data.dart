@@ -9,32 +9,36 @@ import 'package:latlong2/latlong.dart';
 class MapData {
   final LatLng center;
   final List<BusRoute> routes;
+  final List<BusStop> stops;
   List<Bus> buses;
   List<StopEta> etas;
 
   MapData({
     required this.center,
     required this.routes,
+    required this.stops,
     required this.buses,
     required this.etas,
   });
 
   List<Marker> generateMarkers(Function(dynamic) triggerMarkerInfo) {
     List<Marker> markers = [];
-    for (BusRoute route in routes) {
-      if (route.enabled) {
-        for (BusStop stop in route.stops) {
-          markers.add(Marker(
-              point: stop.pos,
-              builder: (context) {
-                return GestureDetector(
-                  child: Icon(Icons.circle, size: 16, color: route.color),
-                  onTap: () => triggerMarkerInfo(stop),
-                  behavior: HitTestBehavior.translucent,
-                );
-              }));
-        }
-      }
+
+    Iterable<BusStop> enabledStops =
+        stops.where((stop) => stop.routes.any((route) => route.enabled));
+    for (BusStop stop in enabledStops) {
+      markers.add(Marker(
+          point: stop.pos,
+          builder: (context) {
+            return GestureDetector(
+              child: Icon(Icons.circle,
+                  size: 16,
+                  color:
+                      stop.routes.firstWhere((route) => route.enabled).color),
+              onTap: () => triggerMarkerInfo(stop),
+              behavior: HitTestBehavior.translucent,
+            );
+          }));
     }
 
     for (Bus bus in buses) {

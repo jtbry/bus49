@@ -19,12 +19,11 @@ class StopInfo extends StatelessWidget {
   Widget build(BuildContext context) {
     mapController.move(stop.pos, 19);
     return SizedBox(
-      height: 100,
       child: Center(
           child: ListView.builder(
-              itemCount: etas.length,
+              itemCount: stop.routes.length,
               itemBuilder: (ctx, i) => ListTile(
-                    title: Text(etas.elementAt(i).eta),
+                    title: Text(stop.routes[i].name),
                   ))),
     );
   }

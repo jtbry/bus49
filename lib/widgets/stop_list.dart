@@ -1,4 +1,3 @@
-import 'package:bus49/models/bus_route.dart';
 import 'package:bus49/models/bus_stop.dart';
 import 'package:bus49/models/map_data.dart';
 import 'package:bus49/widgets/stop_info.dart';
@@ -14,18 +13,8 @@ class StopList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: figure out good way to get/list stops and avoid route duplicates
-    // TODO: display which route stop is a part of
-    List<BusStop> stops = [];
-    for (BusRoute route in mapData.routes) {
-      if (route.enabled) {
-        for (BusStop stop in route.stops) {
-          if (!stops.contains(stop)) {
-            stops.add(stop);
-          }
-        }
-      }
-    }
+    Iterable<BusStop> stops = mapData.stops
+        .where((stop) => stop.routes.any((route) => route.enabled));
 
     if (stops.isEmpty) {
       return const Center(
@@ -36,14 +25,14 @@ class StopList extends StatelessWidget {
       itemCount: stops.length,
       itemBuilder: (context, i) {
         return ListTile(
-          title: Text(stops[i].name),
+          title: Text(stops.elementAt(i).name),
           onTap: () {
             Navigator.pop(context);
             showModalBottomSheet(
                 context: context,
                 builder: (context) => StopInfo(
                     mapController: mapController,
-                    stop: stops[i],
+                    stop: stops.elementAt(i),
                     etas: mapData.etas.where((element) => true)));
           },
         );

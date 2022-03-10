@@ -33,7 +33,6 @@ Future<MapData> fetchMapData() async {
 
   // Parse routes
   List<BusRoute> routes = [];
-  List<StopEta> etas = [];
   for (var key in json['routes'].keys) {
     // Parse route polylines
     List<Polyline> lines = [];
@@ -53,35 +52,43 @@ Future<MapData> fetchMapData() async {
       ));
     }
 
-    // Parse route stops and etas
-    List<BusStop> stops = [];
-    for (var i = 2; i < json['routes'][key].length; i++) {
-      var pureId = json['routes'][key][i][1];
-      var stopId = 'ID$pureId';
-      stops.add(BusStop(
-        id: pureId,
-        pureId: stopId,
-        pos: LatLng(
-          json['stops'][stopId]['latitude'],
-          json['stops'][stopId]['longitude'],
-        ),
-        name: json['stops'][stopId]['name'],
-      ));
-      etas.addAll(await fetchStopEtas(pureId));
-    }
-
     // Add route to array
-    routes.add(BusRoute(
+    BusRoute route = BusRoute(
       id: key,
       name: json['routes'][key][0],
       color: _hexToColor(json['routes'][key][1]),
       routeLines: lines,
-      stops: stops,
       enabled: false,
-    ));
+    );
+    routes.add(route);
   }
-
   routes.first.enabled = true;
+
+  // Parse stops and etas
+  List<BusStop> stops = [];
+  List<StopEta> etas = [];
+  for (BusRoute route in routes) {
+    for (var i = 2; i < json['routes'][route.id].length; i++) {
+      var pureId = json['routes'][route.id][i][1];
+      var stopId = 'ID$pureId';
+      try {
+        stops.firstWhere((element) => element.id == pureId).routes.add(route);
+      } catch (e) {
+        stops.add(BusStop(
+          id: pureId,
+          pureId: stopId,
+          pos: LatLng(
+            json['stops'][stopId]['latitude'],
+            json['stops'][stopId]['longitude'],
+          ),
+          name: json['stops'][stopId]['name'],
+          routes: [route],
+        ));
+        // TODO: find way to lazy load etas they take too long to load at once
+        // etas.addAll(await fetchStopEtas(pureId));
+      }
+    }
+  }
 
   // Get bus data
   List<Bus> buses = await fetchBusData(routes);
@@ -89,6 +96,7 @@ Future<MapData> fetchMapData() async {
   return MapData(
     center: LatLng(35.3066662742558, -80.7345842848605),
     routes: routes,
+    stops: stops,
     buses: buses,
     etas: etas,
   );

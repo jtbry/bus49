@@ -31,7 +31,6 @@ class _MapViewState extends State<MapView> {
       _dataUpdateTimer =
           Timer.periodic(const Duration(seconds: 4), (timer) async {
         List<Bus> newBusData = await fetchBusData(mapData.routes);
-        // TODO: figure out how to update StopEtas for each stop
         setState(() {
           mapData.buses = newBusData;
         });
