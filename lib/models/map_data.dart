@@ -1,6 +1,7 @@
 import 'package:bus49/models/bus.dart';
 import 'package:bus49/models/bus_route.dart';
 import 'package:bus49/models/bus_stop.dart';
+import 'package:bus49/models/stop_eta.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -9,11 +10,13 @@ class MapData {
   final LatLng center;
   final List<BusRoute> routes;
   List<Bus> buses;
+  List<StopEta> etas;
 
   MapData({
     required this.center,
     required this.routes,
     required this.buses,
+    required this.etas,
   });
 
   List<Marker> generateMarkers(Function(dynamic) triggerMarkerInfo) {

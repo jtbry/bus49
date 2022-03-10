@@ -49,6 +49,8 @@ class AppMap extends StatelessWidget {
           builder: (ctx) => StopInfo(
                 mapController: mapController,
                 stop: markerDataObject,
+                // TODO: mapData.getStopEtas(BusStop) ??
+                etas: mapData.etas.where((element) => true),
               ));
     } else if (markerDataObject is Bus) {
       showModalBottomSheet(

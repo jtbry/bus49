@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:bus49/models/bus.dart';
 import 'package:bus49/models/bus_route.dart';
 import 'package:bus49/models/bus_stop.dart';
+import 'package:bus49/models/stop_eta.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:http/http.dart' as http;
@@ -32,7 +33,8 @@ Future<MapData> fetchMapData() async {
 
   // Parse routes
   List<BusRoute> routes = [];
-  json['routes'].forEach((key, value) {
+  List<StopEta> etas = [];
+  for (var key in json['routes'].keys) {
     // Parse route polylines
     List<Polyline> lines = [];
     for (dynamic line in json['routePoints'][key]) {
@@ -51,18 +53,21 @@ Future<MapData> fetchMapData() async {
       ));
     }
 
-    // Parse route stops
+    // Parse route stops and etas
     List<BusStop> stops = [];
     for (var i = 2; i < json['routes'][key].length; i++) {
-      var id = 'ID${json['routes'][key][i][1]}';
+      var pureId = json['routes'][key][i][1];
+      var stopId = 'ID$pureId';
       stops.add(BusStop(
-        id: id,
+        id: pureId,
+        pureId: stopId,
         pos: LatLng(
-          json['stops'][id]['latitude'],
-          json['stops'][id]['longitude'],
+          json['stops'][stopId]['latitude'],
+          json['stops'][stopId]['longitude'],
         ),
-        name: json['stops'][id]['name'],
+        name: json['stops'][stopId]['name'],
       ));
+      etas.addAll(await fetchStopEtas(pureId));
     }
 
     // Add route to array
@@ -74,7 +79,7 @@ Future<MapData> fetchMapData() async {
       stops: stops,
       enabled: false,
     ));
-  });
+  }
 
   routes.first.enabled = true;
 
@@ -85,6 +90,7 @@ Future<MapData> fetchMapData() async {
     center: LatLng(35.3066662742558, -80.7345842848605),
     routes: routes,
     buses: buses,
+    etas: etas,
   );
 }
 
@@ -107,8 +113,8 @@ Future<List<Bus>> fetchBusData(List<BusRoute> routes) async {
   // Decode json
   var json = jsonDecode(await response.stream.bytesToString());
   List<Bus> buses = [];
-  json['buses'].forEach((key, value) {
-    value.forEach((childValue) {
+  for (var value in json['buses'].values) {
+    for (var childValue in value) {
       buses.add(
         Bus(
           deviceId: childValue['deviceId'],
@@ -124,9 +130,43 @@ Future<List<Bus>> fetchBusData(List<BusRoute> routes) async {
               : 0.0,
         ),
       );
-    });
-  });
+    }
+  }
   return buses;
+}
+
+Future<List<StopEta>> fetchStopEtas(String stopId) async {
+  var request = http.Request(
+      'GET',
+      Uri.parse(
+          'https://passio3.com/www/mapGetData.php?eta=3&wTransloc=1&stopIds=$stopId'));
+
+  http.StreamedResponse response = await request.send();
+
+  if (response.statusCode != 200) {
+    throw Exception('fetchStopEta: ${response.reasonPhrase}');
+  }
+
+  var json = jsonDecode(await response.stream.bytesToString());
+  List<StopEta> etas = [];
+  if (json['ETAs'][stopId] == null) {
+    if (json['ETAs']['0000'] != null) {
+      stopId = '0000';
+    }
+    return etas;
+  }
+  for (var etaJson in json['ETAs'][stopId]) {
+    etas.add(StopEta.fromJson(etaJson));
+  }
+  return etas;
+}
+
+Future<List<StopEta>> fetchAllStopEtas(Iterable<BusStop> stops) async {
+  List<StopEta> etas = [];
+  for (BusStop stop in stops) {
+    etas.addAll(await fetchStopEtas(stop.id));
+  }
+  return etas;
 }
 
 Color _hexToColor(String hex) {

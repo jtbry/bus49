@@ -41,8 +41,10 @@ class StopList extends StatelessWidget {
             Navigator.pop(context);
             showModalBottomSheet(
                 context: context,
-                builder: (context) =>
-                    StopInfo(mapController: mapController, stop: stops[i]));
+                builder: (context) => StopInfo(
+                    mapController: mapController,
+                    stop: stops[i],
+                    etas: mapData.etas.where((element) => true)));
           },
         );
       },

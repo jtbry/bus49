@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:bus49/models/bus.dart';
 import 'package:bus49/models/map_data.dart';
 import 'package:bus49/services/passiogo.dart';
 import 'package:bus49/widgets/app_map.dart';
@@ -20,24 +21,28 @@ class MapView extends StatefulWidget {
 class _MapViewState extends State<MapView> {
   late Future<MapData> _mapData;
   late MapController _mapController;
-  late Timer _busUpdateTimer;
+  late Timer _dataUpdateTimer;
 
   @override
   void initState() {
-    super.initState();
     _mapController = MapController();
     _mapData = fetchMapData();
-    _busUpdateTimer = Timer.periodic(const Duration(seconds: 4), (timer) async {
-      setState(() {
-        _mapData
-            .then((data) async => data.buses = await fetchBusData(data.routes));
+    _mapData.then((mapData) {
+      _dataUpdateTimer =
+          Timer.periodic(const Duration(seconds: 4), (timer) async {
+        List<Bus> newBusData = await fetchBusData(mapData.routes);
+        // TODO: figure out how to update StopEtas for each stop
+        setState(() {
+          mapData.buses = newBusData;
+        });
       });
     });
+    super.initState();
   }
 
   @override
   void dispose() {
-    _busUpdateTimer.cancel();
+    _dataUpdateTimer.cancel();
     super.dispose();
   }
 
