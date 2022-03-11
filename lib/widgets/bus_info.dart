@@ -11,6 +11,7 @@ class BusInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // TODO: find a way to figure out next stop / get eta
     return SizedBox(
       height: 100,
       child: Center(child: Text('Bus ${bus.busId} information')),

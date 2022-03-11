@@ -76,7 +76,7 @@ Future<MapData> fetchMapData() async {
       } catch (e) {
         stops.add(BusStop(
           id: pureId,
-          pureId: stopId,
+          pureId: pureId,
           pos: LatLng(
             json['stops'][stopId]['latitude'],
             json['stops'][stopId]['longitude'],
@@ -166,6 +166,7 @@ Future<List<StopEta>> fetchStopEtas(String stopId) async {
   for (var etaJson in json['ETAs'][stopId]) {
     etas.add(StopEta.fromJson(etaJson));
   }
+  etas.sort((a, b) => a.secondsSpent.compareTo(b.secondsSpent));
   return etas;
 }
 
