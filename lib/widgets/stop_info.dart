@@ -20,7 +20,7 @@ class _StopInfoState extends State<StopInfo> {
 
   @override
   void initState() {
-    stopEtas = fetchStopEtas(widget.stop.pureId);
+    stopEtas = fetchStopEtas(widget.stop.pureId, widget.stop.routes);
     super.initState();
   }
 
@@ -30,12 +30,17 @@ class _StopInfoState extends State<StopInfo> {
       future: stopEtas,
       builder: (ctx, snapshot) {
         if (snapshot.hasData) {
+          if (snapshot.requireData.isEmpty) {
+            return const Center(
+              child: Text('No bus ETAs for this stop.'),
+            );
+          }
           return ListView.builder(
             itemCount: snapshot.requireData.length,
             itemBuilder: (context, index) {
               return ListTile(
                 title: Text(
-                    '${snapshot.requireData[index].eta} - ${snapshot.requireData[index].busId}'),
+                    '${snapshot.requireData[index].eta} - ${snapshot.requireData[index].busName} ${snapshot.requireData[index].routeName}'),
               );
             },
           );

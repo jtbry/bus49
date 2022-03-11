@@ -1,14 +1,14 @@
 class StopEta {
   final String eta;
-  final int busId;
+  final String busName;
   final int secondsSpent;
+  final String routeName;
 
-  const StopEta(this.eta, this.busId, this.secondsSpent);
+  const StopEta(this.eta, this.busName, this.secondsSpent, this.routeName);
 
   StopEta.fromJson(Map<String, dynamic> json)
       : eta = json['eta'],
-        busId = json['busId'].runtimeType == int
-            ? json['busId']
-            : int.parse(json['busId']),
-        secondsSpent = json['secondsSpent'];
+        busName = json['busName'],
+        secondsSpent = json['secondsSpent'],
+        routeName = json['theStop']['routeName'];
 }

@@ -143,38 +143,36 @@ Future<List<Bus>> fetchBusData(List<BusRoute> routes) async {
   return buses;
 }
 
-Future<List<StopEta>> fetchStopEtas(String stopId) async {
-  var request = http.Request(
-      'GET',
-      Uri.parse(
-          'https://passio3.com/www/mapGetData.php?eta=3&wTransloc=1&stopIds=$stopId'));
-
-  http.StreamedResponse response = await request.send();
-
-  if (response.statusCode != 200) {
-    throw Exception('fetchStopEta: ${response.reasonPhrase}');
-  }
-
-  var json = jsonDecode(await response.stream.bytesToString());
+Future<List<StopEta>> fetchStopEtas(
+    String stopId, Iterable<BusRoute> routes) async {
   List<StopEta> etas = [];
-  if (json['ETAs'][stopId] == null) {
-    if (json['ETAs']['0000'] != null) {
-      stopId = '0000';
+  for (BusRoute route in routes) {
+    var request = http.Request(
+        'GET',
+        Uri.parse(
+            'https://passio3.com/www/mapGetData.php?eta=3&wTransloc=1&stopIds=$stopId&routeId=${route.id}'));
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode != 200) {
+      throw Exception('fetchStopEta: ${response.reasonPhrase}');
     }
-    return etas;
-  }
-  for (var etaJson in json['ETAs'][stopId]) {
-    etas.add(StopEta.fromJson(etaJson));
+
+    var json = jsonDecode(await response.stream.bytesToString());
+    if (json['ETAs'][stopId] == null) {
+      if (json['ETAs']['0000'] != null) {
+        stopId = '0000';
+      }
+      return etas;
+    }
+    for (var etaJson in json['ETAs'][stopId]) {
+      // Don't allow duplicates
+      if (!etas.any((element) => element.busName == etaJson['busName'])) {
+        etas.add(StopEta.fromJson(etaJson));
+      }
+    }
   }
   etas.sort((a, b) => a.secondsSpent.compareTo(b.secondsSpent));
-  return etas;
-}
-
-Future<List<StopEta>> fetchAllStopEtas(Iterable<BusStop> stops) async {
-  List<StopEta> etas = [];
-  for (BusStop stop in stops) {
-    etas.addAll(await fetchStopEtas(stop.id));
-  }
   return etas;
 }
 
