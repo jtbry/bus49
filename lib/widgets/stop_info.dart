@@ -36,11 +36,21 @@ class _StopInfoState extends State<StopInfo> {
             );
           }
           return ListView.builder(
-            itemCount: snapshot.requireData.length,
+            itemCount: snapshot.requireData.length + 1,
             itemBuilder: (context, index) {
+              Text title;
+              if (index == 0) {
+                title = Text(
+                  widget.stop.name,
+                  textAlign: TextAlign.center,
+                );
+              } else {
+                index -= 1;
+                title = Text(
+                    '${snapshot.requireData[index].eta} - ${snapshot.requireData[index].busName} ${snapshot.requireData[index].routeName}');
+              }
               return ListTile(
-                title: Text(
-                    '${snapshot.requireData[index].eta} - ${snapshot.requireData[index].busName} ${snapshot.requireData[index].routeName}'),
+                title: title,
               );
             },
           );
