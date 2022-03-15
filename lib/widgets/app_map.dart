@@ -23,7 +23,7 @@ class AppMap extends StatelessWidget {
       mapController: mapController,
       options: MapOptions(
         center: mapData.center,
-        zoom: 15,
+        zoom: mapData.useUserLocation ? 17 : 15,
         maxZoom: 18,
       ),
       layers: [

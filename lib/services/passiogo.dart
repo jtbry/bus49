@@ -1,9 +1,11 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:bus49/models/bus.dart';
 import 'package:bus49/models/bus_route.dart';
 import 'package:bus49/models/bus_stop.dart';
 import 'package:bus49/models/stop_eta.dart';
+import 'package:bus49/services/user_location.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:http/http.dart' as http;
@@ -93,8 +95,20 @@ Future<MapData> fetchMapData() async {
   // Get bus data
   List<Bus> buses = await fetchBusData(routes);
 
+  // Get user location for center
+  LatLng centerLocation;
+  bool useUserLocation = false;
+  try {
+    centerLocation = await getUserLocation();
+    useUserLocation = true;
+  } catch (e) {
+    print(e);
+    centerLocation = LatLng(35.3066662742558, -80.7345842848605);
+  }
+
   return MapData(
-    center: LatLng(35.3066662742558, -80.7345842848605),
+    center: centerLocation,
+    useUserLocation: useUserLocation,
     routes: routes,
     stops: stops,
     buses: buses,

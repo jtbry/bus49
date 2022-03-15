@@ -8,6 +8,7 @@ import 'package:latlong2/latlong.dart';
 
 class MapData {
   final LatLng center;
+  final bool useUserLocation;
   final List<BusRoute> routes;
   final List<BusStop> stops;
   List<Bus> buses;
@@ -15,6 +16,7 @@ class MapData {
 
   MapData({
     required this.center,
+    required this.useUserLocation,
     required this.routes,
     required this.stops,
     required this.buses,
