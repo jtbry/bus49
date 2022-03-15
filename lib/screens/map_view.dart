@@ -3,6 +3,9 @@ import 'dart:async';
 import 'package:bus49/models/bus.dart';
 import 'package:bus49/models/map_data.dart';
 import 'package:bus49/services/passiogo.dart';
+import 'package:bus49/services/user_location.dart';
+import 'package:latlong2/latlong.dart';
+
 import 'package:bus49/widgets/app_map.dart';
 import 'package:bus49/widgets/bus_list.dart';
 import 'package:bus49/widgets/label_icon_button.dart';
@@ -28,13 +31,8 @@ class _MapViewState extends State<MapView> {
     _mapController = MapController();
     _mapData = fetchMapData();
     _mapData.then((mapData) {
-      _dataUpdateTimer =
-          Timer.periodic(const Duration(seconds: 4), (timer) async {
-        List<Bus> newBusData = await fetchBusData(mapData.routes);
-        setState(() {
-          mapData.buses = newBusData;
-        });
-      });
+      _dataUpdateTimer = Timer.periodic(
+          const Duration(seconds: 4), (timer) => _updateMapData(mapData));
     });
     super.initState();
   }
@@ -112,5 +110,18 @@ class _MapViewState extends State<MapView> {
         return const Center(child: CircularProgressIndicator());
       },
     );
+  }
+
+  void _updateMapData(MapData mapData) async {
+    List<Bus> newBusData = await fetchBusData(mapData.routes);
+    LatLng? userLocation;
+    if (mapData.userLocation != null) {
+      userLocation = await getUserLocation();
+    }
+
+    setState(() {
+      mapData.buses = newBusData;
+      mapData.userLocation = userLocation;
+    });
   }
 }

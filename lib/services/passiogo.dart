@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
 
 import 'package:bus49/models/bus.dart';
 import 'package:bus49/models/bus_route.dart';
@@ -68,7 +67,6 @@ Future<MapData> fetchMapData() async {
 
   // Parse stops and etas
   List<BusStop> stops = [];
-  List<StopEta> etas = [];
   for (BusRoute route in routes) {
     for (var i = 2; i < json['routes'][route.id].length; i++) {
       var pureId = json['routes'][route.id][i][1];
@@ -86,8 +84,6 @@ Future<MapData> fetchMapData() async {
           name: json['stops'][stopId]['name'],
           routes: [route],
         ));
-        // TODO: find way to lazy load etas they take too long to load at once
-        // etas.addAll(await fetchStopEtas(pureId));
       }
     }
   }
@@ -96,23 +92,19 @@ Future<MapData> fetchMapData() async {
   List<Bus> buses = await fetchBusData(routes);
 
   // Get user location for center
-  LatLng centerLocation;
-  bool useUserLocation = false;
+  LatLng? userLocation;
   try {
-    centerLocation = await getUserLocation();
-    useUserLocation = true;
+    userLocation = await getUserLocation();
   } catch (e) {
-    print(e);
-    centerLocation = LatLng(35.3066662742558, -80.7345842848605);
+    userLocation = null;
   }
 
   return MapData(
-    center: centerLocation,
-    useUserLocation: useUserLocation,
+    defaultCenter: LatLng(35.3066662742558, -80.7345842848605),
     routes: routes,
     stops: stops,
     buses: buses,
-    etas: etas,
+    userLocation: userLocation,
   );
 }
 

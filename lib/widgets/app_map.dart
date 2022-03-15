@@ -22,8 +22,8 @@ class AppMap extends StatelessWidget {
     return FlutterMap(
       mapController: mapController,
       options: MapOptions(
-        center: mapData.center,
-        zoom: mapData.useUserLocation ? 17 : 15,
+        center: mapData.userLocation ?? mapData.defaultCenter,
+        zoom: mapData.userLocation != null ? 17 : 15,
         maxZoom: 18,
       ),
       layers: [

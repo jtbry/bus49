@@ -1,26 +1,23 @@
 import 'package:bus49/models/bus.dart';
 import 'package:bus49/models/bus_route.dart';
 import 'package:bus49/models/bus_stop.dart';
-import 'package:bus49/models/stop_eta.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
 class MapData {
-  final LatLng center;
-  final bool useUserLocation;
+  final LatLng defaultCenter;
   final List<BusRoute> routes;
   final List<BusStop> stops;
   List<Bus> buses;
-  List<StopEta> etas;
+  LatLng? userLocation;
 
   MapData({
-    required this.center,
-    required this.useUserLocation,
+    required this.defaultCenter,
     required this.routes,
     required this.stops,
     required this.buses,
-    required this.etas,
+    this.userLocation,
   });
 
   List<Marker> generateMarkers(Function(dynamic) triggerMarkerInfo) {
@@ -69,6 +66,14 @@ class MapData {
             }));
       }
     }
+
+    if (userLocation != null) {
+      markers.add(Marker(
+          point: userLocation!,
+          builder: (context) =>
+              const Icon(Icons.person_pin, color: Colors.green)));
+    }
+
     return markers;
   }
 
