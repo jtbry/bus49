@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bus49/models/bus_stop.dart';
 import 'package:bus49/models/stop_eta.dart';
 import 'package:bus49/services/passiogo.dart';
@@ -17,11 +19,30 @@ class StopInfo extends StatefulWidget {
 
 class _StopInfoState extends State<StopInfo> {
   late Future<List<StopEta>> stopEtas;
+  late Timer _etaUpdateTimer;
 
   @override
   void initState() {
     stopEtas = fetchStopEtas(widget.stop.pureId, widget.stop.routes);
+    _etaUpdateTimer = Timer.periodic(
+        const Duration(seconds: 4), (timer) => _updateStopInfo());
     super.initState();
+  }
+
+  void _updateStopInfo() {
+    stopEtas.then((value) async {
+      var newEtas = await fetchStopEtas(widget.stop.pureId, widget.stop.routes);
+      setState(() {
+        value.clear();
+        value.addAll(newEtas);
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _etaUpdateTimer.cancel();
+    super.dispose();
   }
 
   @override
